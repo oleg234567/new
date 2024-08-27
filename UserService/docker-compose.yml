@@ -1,0 +1,49 @@
+version: '3.5'
+
+services:
+  db:
+    container_name: pg_db_userService
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: userService
+    ports:
+      - "5449:5432"
+    networks:
+      - eurekaserver_default
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: hdnhdxv@mail.ru
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - eurekaserver_default
+
+  UserService-app:
+    build: ./
+    container_name: 'java-app-UserService'
+    image: user_service-app
+    ports:
+      - "52557:52557"
+    environment:
+      SERVER_PORT: 52557
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/userService
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      - db
+
+    networks:
+      - eurekaserver_default
+
+networks:
+  eurekaserver_default:
+    driver: bridge
+    external: true
+

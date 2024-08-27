@@ -1,0 +1,58 @@
+#Eureka properties
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka  # Используем имя контейнера
+
+server:
+  port: 0
+
+spring:
+  application:
+    name: eclient_userService
+  cloud:
+    function:
+      definition: profileCreated
+    stream:
+      bindings:
+        profileCreated-in-0:
+          destination: profile-created
+          group: userserviceGroup
+      kafka:
+        binder:
+          brokers: localhost:9092  # Используем имя контейнера Kafka, если он в Docker
+
+  #Database properties
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    password: root
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5448}/userService
+    username: root
+
+  #Hibernate properties
+  jpa:
+    hibernate:
+      ddl-auto: update
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  #Kafka properties
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+#Actuator properties
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  health:
+    defaults:
+      enabled: true

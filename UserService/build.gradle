@@ -1,0 +1,127 @@
+plugins {
+	id 'jacoco'
+	id 'java'
+	id 'org.springframework.boot' version '3.2.0'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id "org.owasp.dependencycheck" version "9.0.9"
+	id 'checkstyle'
+}
+
+// Apply Checkstyle configuration from the specified file
+checkstyle {
+	configFile = file("$projectDir/checkstyle.xml") // Путь к конфигурации Checkstyle в корне модуля
+	toolVersion = "10.12.4"
+}
+checkstyleMain {
+	source = 'src/main/java'
+	include '**/*.java'
+}
+
+jacoco {
+	toolVersion = "0.8.7"
+	reportsDirectory = layout.buildDirectory.dir("reports/jacoco")
+}
+
+dependencyCheck {
+	autoUpdate = true
+	format = 'HTML'
+	check.dependsOn dependencyCheckAnalyze
+}
+
+group = 'business.hub'
+version = '0.0.1-SNAPSHOT'
+
+
+java {
+	sourceCompatibility = '17'
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext {
+	set('springCloudVersion', "2023.0.0")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+	implementation 'org.modelmapper:modelmapper:3.1.1'
+	runtimeOnly 'org.postgresql:postgresql'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	compileOnly 'org.projectlombok:lombok:1.18.20'
+	annotationProcessor 'org.projectlombok:lombok:1.18.20'
+	implementation group: 'jakarta.validation', name: 'jakarta.validation-api', version: '3.1.0-M1'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.0'
+
+	implementation 'org.springframework.kafka:spring-kafka'
+	implementation 'org.springframework.cloud:spring-cloud-stream'
+	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+	implementation 'org.springframework.cloud:spring-cloud-starter-stream-kafka'
+	implementation 'org.springframework.cloud:spring-cloud-stream-test-support'
+	implementation 'org.springframework.cloud:spring-cloud-stream-starters:1.0.3.RELEASE'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
+
+	// Добавленные зависимости
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'jakarta.mail:jakarta.mail-api:2.0.1'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	testImplementation 'org.mockito:mockito-core:4.0.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:4.0.0'
+	testImplementation "org.mockito:mockito-inline:4.0.0"
+}
+
+jar {
+	manifest {
+		attributes(
+				'Main-Class': 'business.hub.userservice.UserService'
+		)
+	}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+	}
+}
+
+test {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = false
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.00
+			}
+		}
+	}
+}
+
+check.dependsOn jacocoTestCoverageVerification
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
