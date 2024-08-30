@@ -1,0 +1,37 @@
+server:
+  port: 8761
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 60000
+
+#    Замедляет получение home view в FrontendService, если требуется, можно откомментить
+#    response-cache-update-interval-ms: 300000
+
+  dashboard:
+    enabled: true
+  instance:
+    hostname: eureka-server
+
+spring:
+  application:
+    name: eureka-server
+
+logging:
+  level:
+    com.netflix.discovery: 'OFF'
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
